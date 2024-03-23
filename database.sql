@@ -7,8 +7,8 @@ USE 9Solutions_db;
 
 -- User Layer
 
-CREATE TABLE IF NOT EXISTS tbConhecimentoProjeto(
-    idConhecimentoProjeto INT PRIMARY KEY AUTO_INCREMENT
+CREATE TABLE IF NOT EXISTS conhecimento_projeto(
+    id_conhecimento_projeto INT PRIMARY KEY AUTO_INCREMENT
     ,origem VARCHAR(100) NOT NULL
     ,descricao VARCHAR(255)
     ,CONSTRAINT chck_origem CHECK(
@@ -19,58 +19,59 @@ CREATE TABLE IF NOT EXISTS tbConhecimentoProjeto(
 );
 
 
-CREATE TABLE IF NOT EXISTS tbDoador(
-    idDoador INT PRIMARY KEY AUTO_INCREMENT
-    ,nomeCompleto VARCHAR(60) NOT NULL
-    ,isPF BOOLEAN NOT NULL
-    ,identificadorPessoa CHAR(14) #EX: xxx.xxx.xxx-xx
-    ,telefone CHAR(15) #EX: (00) 00000-0000
-    ,email VARCHAR(100)
-    ,dtCadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    ,fkConhecimentoProjeto INT
-    ,CONSTRAINT fk_tbDoador_tbConhecimentoProjeto Foreign Key (fkConhecimentoProjeto) REFERENCES tbConhecimentoProjeto(idConhecimentoProjeto)
+CREATE TABLE IF NOT EXISTS doador(
+    id_doador INT PRIMARY KEY AUTO_INCREMENT
+    ,nome_completo VARCHAR(255) NOT NULL
+    ,is_pf BOOLEAN NOT NULL
+    ,identificador_pessoa CHAR(11) #EX: xxxxxxxxxxx
+    ,ddd VARCHAR(3)
+    ,telefone VARCHAR(9) #EX: 000000000
+    ,email VARCHAR(255)
+    ,dt_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ,fk_conhecimento_projeto INT
+    ,CONSTRAINT fk_doador_conhecimento_projeto Foreign Key (fk_conhecimento_projeto) REFERENCES conhecimento_projeto(id_conhecimento_projeto)
 );
 
 
 -- Donation Layer
 
-CREATE TABLE IF NOT EXISTS tbCaixa(
-    idCaixa INT PRIMARY KEY AUTO_INCREMENT
+CREATE TABLE IF NOT EXISTS caixa(
+    id_caixa INT PRIMARY KEY AUTO_INCREMENT
     ,genero CHAR(1) CHECK (genero IN ('M', 'F')) NOT NULL
-    ,rangeIdade CHAR(3) NOT NULL #EX 0-0
+    ,range_idade CHAR(3) NOT NULL #EX 0-0
     ,carta TEXT
     ,foto VARCHAR(255) #URL
-    ,fkDoador INT
-    ,CONSTRAINT fk_tbCaixa_tbDoador Foreign Key (fkDoador) REFERENCES tbDoador(idDoador)
+    ,fk_doador INT
+    ,CONSTRAINT fk_caixa_doador Foreign Key (fk_doador) REFERENCES doador(id_doador)
 );
 
-CREATE TABLE IF NOT EXISTS tbItem(
-    idItem INT PRIMARY KEY AUTO_INCREMENT
-    ,itemNome VARCHAR(100)
+CREATE TABLE IF NOT EXISTS item(
+    id_item INT PRIMARY KEY AUTO_INCREMENT
+    ,item_nome VARCHAR(100)
     ,valor DECIMAL(5, 2)
 );
 
-CREATE TABLE IF NOT EXISTS tbItemCaixa(
-    idItemCaixa INT PRIMARY KEY AUTO_INCREMENT
-    ,fkCaixa INT
-    ,fkItem INT
-    ,CONSTRAINT fk_tbItemCaixa_tbCaixa Foreign Key (fkCaixa) REFERENCES tbCaixa(idCaixa)
-    ,CONSTRAINT fk_tbItemCaixa_tbItem Foreign Key (fkItem) REFERENCES tbItem(idItem)
+CREATE TABLE IF NOT EXISTS item_caixa(
+    id_item_caixa INT PRIMARY KEY AUTO_INCREMENT
+    ,fk_caixa INT
+    ,fk_item INT
+    ,CONSTRAINT fk_item_caixa_caixa Foreign Key (fk_caixa) REFERENCES caixa(id_caixa)
+    ,CONSTRAINT fk_item_caixa_item Foreign Key (fk_item) REFERENCES item(id_item)
 );
 
 -- Metrics Layer
 
-CREATE VIEW `vw_origemProjeto` AS
-	SELECT COUNT(origem) AS 'freqOrigem', origem FROM tbConhecimentoProjeto GROUP BY origem;
+CREATE VIEW `vw_origem_projeto` AS
+	SELECT COUNT(origem) AS 'freq_origem', origem FROM conhecimento_projeto GROUP BY origem;
 
-CREATE VIEW `vw_topItens` AS
-	SELECT COUNT(fkItem) AS 'quantItem', itemNome FROM tbItemCaixa
-    INNER JOIN tbItem
-		ON tbItemCaixa.fkItem = tbItem.idItem
-	GROUP BY fkItem
-    ORDER BY QuantItem DESC;
+CREATE VIEW `vw_top_itens` AS
+	SELECT COUNT(fk_item) AS 'quant_item', item_nome FROM item_caixa
+    INNER JOIN item
+		ON item_caixa.fk_item = item.id_item
+	GROUP BY fk_item
+    ORDER BY quant_item DESC;
 
-CREATE VIEW `vw_topRange` AS
-	SELECT COUNT(rangeIdade) AS 'freqRange', rangeIdade FROM tbCaixa
-    GROUP BY rangeIdade
-    ORDER BY freqRange;
+CREATE VIEW `vw_top_range` AS
+	SELECT COUNT(range_idade) AS 'freq_range', range_idade FROM caixa
+    GROUP BY range_idade
+    ORDER BY freq_range;
