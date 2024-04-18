@@ -1,3 +1,4 @@
+-- DROP DATABASE `db_9solutions`;
 CREATE SCHEMA IF NOT EXISTS `db_9solutions` DEFAULT CHARACTER SET utf8 ;
 USE `db_9solutions` ;
 
@@ -51,6 +52,7 @@ CREATE TABLE IF NOT EXISTS `db_9solutions`.`produto` (
   `fk_categoria_produto` INT NOT NULL,
   `fk_faixa_etaria` INT NOT NULL,
   `genero` CHAR NULL,
+  `ativo` TINYINT NOT NULL DEFAULT FALSE,
   PRIMARY KEY (`id_produto`, `fk_categoria_produto`, `fk_faixa_etaria`),
   INDEX `fk_produto_categoria_produto1_idx` (`fk_categoria_produto` ASC) VISIBLE,
   INDEX `fk_produto_faixa_etaria1_idx` (`fk_faixa_etaria` ASC) VISIBLE,
