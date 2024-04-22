@@ -1,4 +1,4 @@
--- DROP DATABASE `db_9solutions`;
+DROP DATABASE IF EXISTS `db_9solutions`;
 CREATE SCHEMA IF NOT EXISTS `db_9solutions` DEFAULT CHARACTER SET utf8 ;
 USE `db_9solutions` ;
 
@@ -37,9 +37,9 @@ CREATE TABLE IF NOT EXISTS `db_9solutions`.`caixa` (
 -- Table `db_9solutions`.`categoria_produto`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `db_9solutions`.`categoria_produto` (
-  `id_categoria_prdouto` INT NOT NULL AUTO_INCREMENT,
+  `id_categoria_produto` INT NOT NULL AUTO_INCREMENT,
   `nome` VARCHAR(40) NOT NULL,
-  PRIMARY KEY (`id_categoria_prdouto`));
+  PRIMARY KEY (`id_categoria_produto`));
 
 
 -- -----------------------------------------------------
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS `db_9solutions`.`produto` (
   INDEX `fk_produto_faixa_etaria1_idx` (`fk_faixa_etaria` ASC) VISIBLE,
   CONSTRAINT `fk_produto_categoria_produto1`
     FOREIGN KEY (`fk_categoria_produto`)
-    REFERENCES `db_9solutions`.`categoria_produto` (`id_categoria_prdouto`)
+    REFERENCES `db_9solutions`.`categoria_produto` (`id_categoria_produto`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_produto_faixa_etaria1`
@@ -140,3 +140,7 @@ CREATE TABLE IF NOT EXISTS `db_9solutions`.`caixa_carrinho` (
 ENGINE = InnoDB;
 
 USE `db_9solutions` ;
+
+CREATE USER IF NOT EXISTS '9solutions'@'localhost' IDENTIFIED BY '9solutions';
+GRANT ALL PRIVILEGES ON * . * TO '9solutions'@'localhost';
+FLUSH PRIVILEGES;
