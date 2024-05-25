@@ -259,6 +259,32 @@ ORDER BY
 select * from vw_quantidade_doacoes_por_mes;
 
 
+-- view de qtd de produtos doados por categoria em um intervalo de tempo (Exeplo usado: doces por ano)
+
+CREATE VIEW vw_quantidade_produtos_por_categoria AS
+SELECT 
+    YEAR(p.data_pedido) AS ano,
+    pr.nome AS produto,
+    cp.nome AS categoria,
+    COUNT(ic.id_produto_caixa) AS quantidade_produtos_doacao
+FROM 
+    pedido p
+    INNER JOIN caixa c ON p.idpedido = c.fk_pedido
+    INNER JOIN item_caixa ic ON c.id_caixa = ic.fk_caixa
+    INNER JOIN produto pr ON ic.fk_produto = pr.id_produto
+    INNER JOIN categoria_produto cp ON pr.fk_categoria_produto = cp.id_categoria_produto
+WHERE 
+    cp.nome = 'DOCES'
+GROUP BY 
+    YEAR(p.data_pedido),
+    pr.nome,
+    cp.nome
+ORDER BY 
+    ano, produto;
+    
+select * from vw_quantidade_produtos_por_categoria;
+
+
 -- INSERTS PARA TESTE -------------------------------------
 INSERT INTO faixa_etaria (faixa_nome, limite_inferior, limite_superior) VALUES 
 ('Criança', 0, 12),
