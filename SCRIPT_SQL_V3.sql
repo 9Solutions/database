@@ -1,6 +1,6 @@
 CREATE SCHEMA IF NOT EXISTS `db_9solutions` DEFAULT CHARACTER SET utf8 ;
 USE `db_9solutions` ;
- 
+
 -- -----------------------------------------------------
 -- Table `db_9solutions`.`faixa_etaria`
 -- -----------------------------------------------------
@@ -176,3 +176,116 @@ CREATE TABLE IF NOT EXISTS `db_9solutions`.`metodo_pagamento_pedido` (
     ON UPDATE NO ACTION);
 
 USE `db_9solutions` ;
+
+-- VIEWS -------------------------------------------------
+
+-- View para KPI de qtd de caixas para serem montadas
+CREATE VIEW vw_caixas_em_montagem AS
+SELECT 
+    COUNT(c.id_caixa) AS quantidade_caixas_em_montagem
+FROM 
+    caixa c
+    INNER JOIN pedido p ON c.fk_pedido = p.idpedido
+    INNER JOIN status_pedido sp ON p.fk_status_pedido = sp.id_status_pedido
+WHERE 
+    sp.status = 'Em montagem';
+    
+SELECT * FROM vw_caixas_em_montagem;
+    
+-- View para KPI de qtd de caixas para serem entregues
+CREATE VIEW vw_caixas_para_entregar AS
+SELECT 
+    COUNT(c.id_caixa) AS quantidade_caixas_em_montagem
+FROM 
+    caixa c
+    INNER JOIN pedido p ON c.fk_pedido = p.idpedido
+    INNER JOIN status_pedido sp ON p.fk_status_pedido = sp.id_status_pedido
+WHERE 
+    sp.status = 'Pronto para Entrega';
+    
+SELECT * FROM vw_caixas_para_entregar;
+    
+    
+-- vw para KPI de quantidade de caixas ATRASADAS
+CREATE VIEW vw_caixas_atrasadas AS
+SELECT 
+    COUNT(c.id_caixa) AS quantidade_caixas_atrasadas
+FROM 
+    caixa c
+    INNER JOIN pedido p ON c.fk_pedido = p.idpedido
+    INNER JOIN status_pedido sp ON p.fk_status_pedido = sp.id_status_pedido
+WHERE 
+    p.data_pedido < NOW() - INTERVAL 2 WEEK
+    AND sp.status != 'Entregue';
+    
+select * from vw_caixas_atrasadas;
+    
+
+-- view para qtd de pedidos por faixa etaria por meses do ano
+CREATE VIEW vw_quantidade_pedidos_por_faixa_etaria AS
+SELECT 
+    YEAR(p.data_pedido) AS ano,
+    MONTH(p.data_pedido) AS mes,
+    fe.faixa_nome,
+    COUNT(DISTINCT p.idpedido) AS quantidade_pedidos
+FROM 
+    pedido p
+    INNER JOIN caixa c ON p.idpedido = c.fk_pedido
+    INNER JOIN faixa_etaria fe ON c.fk_faixa_etaria = fe.id_faixa_etaria
+GROUP BY 
+    YEAR(p.data_pedido),
+    MONTH(p.data_pedido),
+    fe.faixa_nome
+ORDER BY 
+    ano, mes, fe.faixa_nome;
+    
+select * from vw_quantidade_pedidos_por_faixa_etaria;
+    
+    
+-- view para buscar a qtd de pedidos por meses do ano
+CREATE VIEW vw_quantidade_doacoes_por_mes AS
+SELECT 
+    YEAR(data_pedido) AS ano,
+    MONTH(data_pedido) AS mes,
+    COUNT(*) AS quantidade_doacoes
+FROM 
+    pedido
+GROUP BY 
+    YEAR(data_pedido),
+    MONTH(data_pedido)
+ORDER BY 
+    ano, mes;
+    
+select * from vw_quantidade_doacoes_por_mes;
+
+
+-- INSERTS PARA TESTE -------------------------------------
+INSERT INTO faixa_etaria (faixa_nome, limite_inferior, limite_superior) VALUES 
+('Criança', 0, 12),
+('Adolescente', 13, 18);
+
+-- Inserir dados na tabela status_pedido
+INSERT INTO status_pedido (id_status_pedido, status) VALUES 
+(1, 'Novo'),
+(2, 'Em montagem'),
+(3, 'Enviado'),
+(4, 'Entregue');
+
+-- Inserir dados na tabela doador
+INSERT INTO doador (nome_completo, identificador, email, telefone, senha) VALUES 
+('João Silva', '12345678901234', 'joao.silva@example.com', '11123456789', 'senha123'),
+('Maria Oliveira', '23456789012345', 'maria.oliveira@example.com', '22123456789', 'senha456');
+
+-- Inserir dados na tabela pedido
+INSERT INTO pedido (idpedido, data_pedido, valor_total, fk_status_pedido, fk_doador) VALUES 
+(5, '2023-01-01 10:00:00', 100.00, 4, 1),
+(6, '2023-02-01 11:00:00', 200.00, 4, 2),
+(7, '2023-03-01 12:00:00', 150.00, 4, 1),
+(8, '2023-04-01 13:00:00', 250.00, 4, 2);
+
+-- Inserir dados na tabela caixa
+INSERT INTO caixa (genero, carta, url, dt_criacao, dt_entrega, qtd, fk_faixa_etaria, fk_pedido) VALUES 
+('M', 'Carta 1', 'http://example.com/1', '2023-01-02 10:00:00', NULL, 5, 1, 5),
+('F', 'Carta 2', 'http://example.com/2', '2023-02-02 11:00:00', NULL, 10, 2, 6),
+('M', 'Carta 3', 'http://example.com/3', '2023-03-02 12:00:00', NULL, 7, 1, 7),
+('F', 'Carta 4', 'http://example.com/4', '2023-04-02 13:00:00', NULL, 12, 2, 8);
