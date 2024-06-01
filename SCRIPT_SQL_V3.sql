@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `db_9solutions`.`doador` (
   `email` VARCHAR(255) NULL DEFAULT NULL,
   `dt_cadastro` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `telefone` VARCHAR(20) NULL,
-  `senha` VARCHAR(30) NULL,
+  `senha` VARCHAR(64) NULL,
   PRIMARY KEY (`id_doador`));
 
 
