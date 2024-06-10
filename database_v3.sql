@@ -1,4 +1,6 @@
+-- Active: 1706994600820@@127.0.0.1@3306@db_9solutions
 -- MySQL Workbench Forward Engineering
+DROP DATABASE IF EXISTS `db_9solutions`;
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
@@ -353,27 +355,14 @@ CREATE  OR REPLACE VIEW `vw_top_itens` AS
 -- -----------------------------------------------------
 DROP TABLE IF EXISTS `db_9solutions`.`vw_top_range`;
 USE `db_9solutions`;
-CREATE  OR REPLACE VIEW `vw_top_range` AS
-	SELECT COUNT(range_idade) AS 'freq_range', range_idade FROM caixa
-    GROUP BY range_idade
-    ORDER BY freq_range;
+CREATE OR REPLACE VIEW `vw_top_range` AS
+  SELECT COUNT(*) AS 'freq_range', faixa_nome AS 'range_idade' FROM faixa_etaria
+  INNER JOIN caixa ON faixa_etaria.id_faixa_etaria = caixa.fk_faixa_etaria
+  GROUP BY faixa_etaria.id_faixa_etaria, faixa_etaria.faixa_nome
+  ORDER BY freq_range;
 
--- -----------------------------------------------------
--- View `db_9solutions`.`vw_caixas_abandonadas`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `db_9solutions`.`vw_caixas_abandonadas`;
-USE `db_9solutions`;
-CREATE  OR REPLACE VIEW `vw_caixas_abandonadas` AS
-	SELECT COUNT(id_caixa) AS 'qtd_caixas_abandonadas' FROM caixa
-    WHERE fk_doador IS NULL;
 
--- -----------------------------------------------------
--- View `db_9solutions`.`vw_resumo_pedidos`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `db_9solutions`.`vw_resumo_pedidos`;
-USE `db_9solutions`;
-CREATE  OR REPLACE VIEW `vw_resumo_pedidos` AS
-select * from pedidos;
+
 
 -- -----------------------------------------------------
 -- View `db_9solutions`.`vw_caixa_ano_faixa_etaria`
