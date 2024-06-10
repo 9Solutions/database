@@ -219,10 +219,9 @@ WHERE
     AND sp.status != 'Entregue';
     
 select * from vw_caixas_atrasadas;
-    
 
 -- view para qtd de pedidos por faixa etaria por meses do ano
-CREATE VIEW vw_quantidade_pedidos_por_faixa_etaria AS
+CREATE VIEW vw_qtd_pedidos_por_faixa_etaria AS
 SELECT 
     YEAR(p.data_pedido) AS ano,
     MONTH(p.data_pedido) AS mes,
@@ -239,29 +238,30 @@ GROUP BY
 ORDER BY 
     ano, mes, fe.faixa_nome;
     
-select * from vw_quantidade_pedidos_por_faixa_etaria;
+select * from vw_qtd_pedidos_por_faixa_etaria;
     
     
 -- view para buscar a qtd de pedidos por meses do ano
-CREATE VIEW vw_quantidade_doacoes_por_mes AS
+CREATE VIEW vw_pedidos_por_mes AS
 SELECT 
-    YEAR(data_pedido) AS ano,
-    MONTH(data_pedido) AS mes,
-    COUNT(*) AS quantidade_doacoes
+    p.idpedido,
+    p.data_pedido,
+    p.valor_total,
+    p.fk_status_pedido,
+    p.fk_doador,
+    DAY(p.data_pedido) AS dia,
+    MONTH(p.data_pedido) AS mes,
+    YEAR(p.data_pedido) AS ano
 FROM 
-    pedido
-GROUP BY 
-    YEAR(data_pedido),
-    MONTH(data_pedido)
+    pedido p
 ORDER BY 
-    ano, mes;
-    
-select * from vw_quantidade_doacoes_por_mes;
+    ano, mes, dia;
 
+select * from vw_pedidos_por_mes;
 
 -- view de qtd de produtos doados por categoria em um intervalo de tempo (Exeplo usado: doces por ano)
 
-CREATE VIEW vw_quantidade_produtos_por_categoria AS
+CREATE VIEW vw_qtd_produtos_por_categoria AS
 SELECT 
     YEAR(p.data_pedido) AS ano,
     pr.nome AS produto,
@@ -282,7 +282,7 @@ GROUP BY
 ORDER BY 
     ano, produto;
     
-select * from vw_quantidade_produtos_por_categoria;
+select * from vw_qtd_produtos_por_categoria;
 
 
 -- INSERTS PARA TESTE -------------------------------------
