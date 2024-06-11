@@ -288,129 +288,142 @@ ENGINE = InnoDB;
 
 USE `db_9solutions` ;
 
--- -----------------------------------------------------
--- Placeholder table for view `db_9solutions`.`vw_top_itens`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `db_9solutions`.`vw_top_itens` (`'quant_item'` INT, `item_nome` INT);
+-- View para KPI de qtd de caixas para serem montadas
+CREATE VIEW vw_caixas_em_montagem AS
+SELECT 
+    COUNT(c.id_caixa) AS quantidade_caixas_em_montagem
+FROM 
+    caixa c
+    INNER JOIN pedido p ON c.fk_pedido = p.idpedido
+    INNER JOIN status_pedido sp ON p.fk_status_pedido = sp.id_status_pedido
+WHERE 
+    sp.status = 'Em montagem';
+    
+SELECT * FROM vw_caixas_em_montagem;
+    
+-- View para KPI de qtd de caixas para serem entregues
+CREATE VIEW vw_caixas_para_entregar AS
+SELECT 
+    COUNT(c.id_caixa) AS quantidade_caixas_para_entregar
+FROM 
+    caixa c
+    INNER JOIN pedido p ON c.fk_pedido = p.idpedido
+    INNER JOIN status_pedido sp ON p.fk_status_pedido = sp.id_status_pedido
+WHERE 
+    sp.status = 'Pronto para Entrega';
+    
+SELECT * FROM vw_caixas_para_entregar;
+    
+    
+-- vw para KPI de quantidade de caixas ATRASADAS
+CREATE VIEW vw_caixas_atrasadas AS
+SELECT 
+    COUNT(c.id_caixa) AS quantidade_caixas_atrasadas
+FROM 
+    caixa c
+    INNER JOIN pedido p ON c.fk_pedido = p.idpedido
+    INNER JOIN status_pedido sp ON p.fk_status_pedido = sp.id_status_pedido
+WHERE 
+    p.data_pedido < NOW() - INTERVAL 2 WEEK
+    AND sp.status != 'Entregue';
+    
+select * from vw_caixas_atrasadas;
 
--- -----------------------------------------------------
--- Placeholder table for view `db_9solutions`.`vw_top_range`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `db_9solutions`.`vw_top_range` (`'freq_range'` INT, `range_idade` INT);
+-- view para qtd de pedidos por faixa etaria por meses do ano
+CREATE VIEW vw_qtd_pedidos_por_faixa_etaria AS
+SELECT 
+    YEAR(p.data_pedido) AS ano,
+    MONTH(p.data_pedido) AS mes,
+    fe.faixa_nome,
+    COUNT(DISTINCT p.idpedido) AS quantidade_pedidos
+FROM 
+    pedido p
+    INNER JOIN caixa c ON p.idpedido = c.fk_pedido
+    INNER JOIN faixa_etaria fe ON c.fk_faixa_etaria = fe.id_faixa_etaria
+GROUP BY 
+    YEAR(p.data_pedido),
+    MONTH(p.data_pedido),
+    fe.faixa_nome
+ORDER BY 
+    ano, mes, fe.faixa_nome;
+    
+select * from vw_qtd_pedidos_por_faixa_etaria;
+    
+    
+-- view para buscar a qtd de pedidos por meses do ano
+CREATE VIEW vw_pedidos_por_mes AS
+SELECT 
+    p.idpedido,
+    p.data_pedido,
+    p.valor_total,
+    p.fk_status_pedido,
+    p.fk_doador,
+    DAY(p.data_pedido) AS dia,
+    MONTH(p.data_pedido) AS mes,
+    YEAR(p.data_pedido) AS ano
+FROM 
+    pedido p
+ORDER BY 
+    ano, mes, dia;
 
--- -----------------------------------------------------
--- Placeholder table for view `db_9solutions`.`vw_caixas_abandonadas`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `db_9solutions`.`vw_caixas_abandonadas` (`'qtd_caixas_abandonadas'` INT);
+select * from vw_pedidos_por_mes;
 
--- -----------------------------------------------------
--- Placeholder table for view `db_9solutions`.`vw_resumo_pedidos`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `db_9solutions`.`vw_resumo_pedidos` (`id` INT);
+-- view de qtd de produtos doados por categoria em um intervalo de tempo (Exeplo usado: doces por ano)
 
--- -----------------------------------------------------
--- Placeholder table for view `db_9solutions`.`vw_caixa_ano_faixa_etaria`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `db_9solutions`.`vw_caixa_ano_faixa_etaria` (`id_caixa` INT, `genero` INT, `carta` INT, `url` INT, `dt_criacao` INT, `dt_entrega` INT, `qtd` INT, `fk_faixa_etaria` INT, `fk_pedido` INT);
-
--- -----------------------------------------------------
--- Placeholder table for view `db_9solutions`.`vw_caixas_para_entregar`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `db_9solutions`.`vw_caixas_para_entregar` (`id_caixa` INT, `genero` INT, `carta` INT, `url` INT, `dt_criacao` INT, `dt_entrega` INT, `qtd` INT, `fk_faixa_etaria` INT, `fk_pedido` INT);
-
--- -----------------------------------------------------
--- Placeholder table for view `db_9solutions`.`vw_caixas_em_montagem`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `db_9solutions`.`vw_caixas_em_montagem` (`id_caixa` INT, `genero` INT, `carta` INT, `url` INT, `dt_criacao` INT, `dt_entrega` INT, `qtd` INT, `fk_faixa_etaria` INT, `fk_pedido` INT);
-
--- -----------------------------------------------------
--- Placeholder table for view `db_9solutions`.`vw_caixas_atrasadas`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `db_9solutions`.`vw_caixas_atrasadas` (`id_caixa` INT, `genero` INT, `carta` INT, `url` INT, `dt_criacao` INT, `dt_entrega` INT, `qtd` INT, `fk_faixa_etaria` INT, `fk_pedido` INT);
-
--- -----------------------------------------------------
--- Placeholder table for view `db_9solutions`.`vw_total_doacoes_mes`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `db_9solutions`.`vw_total_doacoes_mes` (`idpedido` INT, `data_pedido` INT, `valor_total` INT, `fk_status_pedido` INT, `fk_doador` INT);
-
--- -----------------------------------------------------
--- Placeholder table for view `db_9solutions`.`vw_quantidade_produtos_por_categoria`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `db_9solutions`.`vw_quantidade_produtos_por_categoria` (`idpedido` INT, `data_pedido` INT, `valor_total` INT, `fk_status_pedido` INT, `fk_doador` INT);
-
--- -----------------------------------------------------
--- View `db_9solutions`.`vw_top_itens`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `db_9solutions`.`vw_top_itens`;
-USE `db_9solutions`;
-CREATE  OR REPLACE VIEW `vw_top_itens` AS
-	SELECT COUNT(fk_produto) AS 'quant_item', nome FROM item_caixa
-    INNER JOIN produto
-		ON item_caixa.fk_produto = produto.id_produto
-	GROUP BY fk_produto
-    ORDER BY quant_item DESC;
-
--- -----------------------------------------------------
--- View `db_9solutions`.`vw_top_range`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `db_9solutions`.`vw_top_range`;
-USE `db_9solutions`;
-CREATE OR REPLACE VIEW `vw_top_range` AS
-  SELECT COUNT(*) AS 'freq_range', faixa_nome AS 'range_idade' FROM faixa_etaria
-  INNER JOIN caixa ON faixa_etaria.id_faixa_etaria = caixa.fk_faixa_etaria
-  GROUP BY faixa_etaria.id_faixa_etaria, faixa_etaria.faixa_nome
-  ORDER BY freq_range;
+CREATE VIEW vw_qtd_produtos_por_categoria AS
+SELECT 
+    YEAR(p.data_pedido) AS ano,
+    pr.nome AS produto,
+    cp.nome AS categoria,
+    COUNT(ic.id_produto_caixa) AS quantidade_produtos_doacao
+FROM 
+    pedido p
+    INNER JOIN caixa c ON p.idpedido = c.fk_pedido
+    INNER JOIN item_caixa ic ON c.id_caixa = ic.fk_caixa
+    INNER JOIN produto pr ON ic.fk_produto = pr.id_produto
+    INNER JOIN categoria_produto cp ON pr.fk_categoria_produto = cp.id_categoria_produto
+WHERE 
+    cp.nome = 'DOCES'
+GROUP BY 
+    YEAR(p.data_pedido),
+    pr.nome,
+    cp.nome
+ORDER BY 
+    ano, produto;
+    
+select * from vw_qtd_produtos_por_categoria;
 
 
+-- INSERTS PARA TESTE -------------------------------------
+INSERT INTO faixa_etaria (faixa_nome, limite_inferior, limite_superior) VALUES 
+('Criança', 0, 12),
+('Adolescente', 13, 18);
 
+-- Inserir dados na tabela status_pedido
+INSERT INTO status_pedido (id_status_pedido, status) VALUES 
+(1, 'Novo'),
+(2, 'Em montagem'),
+(3, 'Enviado'),
+(4, 'Entregue');
 
--- -----------------------------------------------------
--- View `db_9solutions`.`vw_caixa_ano_faixa_etaria`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `db_9solutions`.`vw_caixa_ano_faixa_etaria`;
-USE `db_9solutions`;
-CREATE  OR REPLACE VIEW `vw_caixa_ano_faixa_etaria` AS
-select * from caixa;
+-- Inserir dados na tabela doador
+INSERT INTO doador (nome_completo, identificador, email, telefone, senha) VALUES 
+('João Silva', '12345678901234', 'joao.silva@example.com', '11123456789', 'senha123'),
+('Maria Oliveira', '23456789012345', 'maria.oliveira@example.com', '22123456789', 'senha456');
 
--- -----------------------------------------------------
--- View `db_9solutions`.`vw_caixas_para_entregar`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `db_9solutions`.`vw_caixas_para_entregar`;
-USE `db_9solutions`;
-CREATE  OR REPLACE VIEW `vw_caixas_para_entregar` AS
-select * from caixa;
+-- Inserir dados na tabela pedido
+INSERT INTO pedido (idpedido, data_pedido, valor_total, fk_status_pedido, fk_doador) VALUES 
+(5, '2023-01-01 10:00:00', 100.00, 4, 1),
+(6, '2023-02-01 11:00:00', 200.00, 4, 2),
+(7, '2023-03-01 12:00:00', 150.00, 4, 1),
+(8, '2023-04-01 13:00:00', 250.00, 4, 2);
 
--- -----------------------------------------------------
--- View `db_9solutions`.`vw_caixas_em_montagem`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `db_9solutions`.`vw_caixas_em_montagem`;
-USE `db_9solutions`;
-CREATE  OR REPLACE VIEW `vw_caixas_em_montagem` AS
-select * from caixa;
-
--- -----------------------------------------------------
--- View `db_9solutions`.`vw_caixas_atrasadas`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `db_9solutions`.`vw_caixas_atrasadas`;
-USE `db_9solutions`;
-CREATE  OR REPLACE VIEW `vw_caixas_atrasadas` AS
-select * from caixa;
-
--- -----------------------------------------------------
--- View `db_9solutions`.`vw_total_doacoes_mes`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `db_9solutions`.`vw_total_doacoes_mes`;
-USE `db_9solutions`;
-CREATE  OR REPLACE VIEW `vw_total_doacoes_mes` AS
-select * from pedido;
-
--- -----------------------------------------------------
--- View `db_9solutions`.`vw_quantidade_produtos_por_categoria`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `db_9solutions`.`vw_quantidade_produtos_por_categoria`;
-USE `db_9solutions`;
-CREATE  OR REPLACE VIEW `vw_quantidade_produtos_por_categoria` AS
-select * from pedido;
+-- Inserir dados na tabela caixa
+INSERT INTO caixa (genero, carta, url, dt_criacao, dt_entrega, qtd, fk_faixa_etaria, fk_pedido) VALUES 
+('M', 'Carta 1', 'http://example.com/1', '2023-01-02 10:00:00', NULL, 5, 1, 5),
+('F', 'Carta 2', 'http://example.com/2', '2023-02-02 11:00:00', NULL, 10, 2, 6),
+('M', 'Carta 3', 'http://example.com/3', '2023-03-02 12:00:00', NULL, 7, 1, 7),
+('F', 'Carta 4', 'http://example.com/4', '2023-04-02 13:00:00', NULL, 12, 2, 8);
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;

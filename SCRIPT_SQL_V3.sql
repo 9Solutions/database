@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS `db_9solutions`;
 CREATE SCHEMA IF NOT EXISTS `db_9solutions` DEFAULT CHARACTER SET utf8 ;
 USE `db_9solutions` ;
 
@@ -195,7 +196,7 @@ SELECT * FROM vw_caixas_em_montagem;
 -- View para KPI de qtd de caixas para serem entregues
 CREATE VIEW vw_caixas_para_entregar AS
 SELECT 
-    COUNT(c.id_caixa) AS quantidade_caixas_em_montagem
+    COUNT(c.id_caixa) AS quantidade_caixas_para_entregar
 FROM 
     caixa c
     INNER JOIN pedido p ON c.fk_pedido = p.idpedido
