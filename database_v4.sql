@@ -49,6 +49,14 @@ CREATE TABLE IF NOT EXISTS `db_9solutions`.`doador` (
   `senha` VARCHAR(255) NULL,
   PRIMARY KEY (`id_doador`));
 
+-- -----------------------------------------------------
+-- Table `db_9solutions`.`dash_user`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `db_9solutions`.`dash_user` (
+  `id_dash_user` INT NOT NULL AUTO_INCREMENT,
+  `email` VARCHAR(255) NULL DEFAULT NULL,
+  `senha` VARCHAR(255) NULL,
+  PRIMARY KEY (`id_dash_user`));
 
 -- -----------------------------------------------------
 -- Table `db_9solutions`.`pedido`
