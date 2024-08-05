@@ -1,21 +1,15 @@
-DROP DATABASE IF EXISTS `db_9solutions`;
 CREATE SCHEMA IF NOT EXISTS `db_9solutions` DEFAULT CHARACTER SET utf8 ;
-USE `db_9solutions` ;
+USE `db_9solutions`;
 
--- -----------------------------------------------------
--- Table `db_9solutions`.`faixa_etaria`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `db_9solutions`.`faixa_etaria` (
   `id_faixa_etaria` INT NOT NULL AUTO_INCREMENT,
   `faixa_nome` VARCHAR(45) NULL,
   `limite_inferior` INT NULL,
   `limite_superior` INT NULL,
+  `condicao` TINYINT NOT NULL,
   PRIMARY KEY (`id_faixa_etaria`));
 
 
--- -----------------------------------------------------
--- Table `db_9solutions`.`status_pedido`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `db_9solutions`.`status_pedido` (
   `id_status_pedido` INT NOT NULL,
   `status` VARCHAR(45) NULL,
@@ -23,26 +17,21 @@ CREATE TABLE IF NOT EXISTS `db_9solutions`.`status_pedido` (
 ENGINE = InnoDB;
 
 
--- -----------------------------------------------------
--- Table `db_9solutions`.`doador`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `db_9solutions`.`doador` (
   `id_doador` INT NOT NULL AUTO_INCREMENT,
   `nome_completo` VARCHAR(255) NOT NULL,
   `identificador` CHAR(14) NULL DEFAULT NULL,
   `email` VARCHAR(255) NULL DEFAULT NULL,
   `dt_cadastro` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `permissao` VARCHAR(20) NOT NULL,
   `telefone` VARCHAR(20) NULL,
-  `senha` VARCHAR(64) NULL,
+  `senha` VARCHAR(255) NULL,
   PRIMARY KEY (`id_doador`));
 
 
--- -----------------------------------------------------
--- Table `db_9solutions`.`pedido`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `db_9solutions`.`pedido` (
-  `idpedido` INT NOT NULL,
-  `data_pedido` DATETIME NULL,
+  `idpedido` INT NOT NULL auto_increment,
+  `data_pedido` DATE NULL,
   `valor_total` DOUBLE NULL,
   `fk_status_pedido` INT NOT NULL,
   `fk_doador` INT NOT NULL,
@@ -62,20 +51,17 @@ CREATE TABLE IF NOT EXISTS `db_9solutions`.`pedido` (
 ENGINE = InnoDB;
 
 
--- -----------------------------------------------------
--- Table `db_9solutions`.`caixa`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `db_9solutions`.`caixa` (
   `id_caixa` INT NOT NULL AUTO_INCREMENT,
   `genero` CHAR(1) NOT NULL,
   `carta` TEXT NULL DEFAULT NULL,
   `url` VARCHAR(255) NULL DEFAULT NULL,
-  `dt_criacao` DATETIME NULL,
-  `dt_entrega` DATETIME NULL,
+  `dt_criacao` DATE NULL,
+  `dt_entrega` DATE NULL,
   `qtd` INT NULL,
   `fk_faixa_etaria` INT NOT NULL,
   `fk_pedido` INT NOT NULL,
-  PRIMARY KEY (`id_caixa`, `fk_faixa_etaria`, `fk_pedido`),
+  PRIMARY KEY (`id_caixa`),
   INDEX `fk_caixa_faixa_etaria1_idx` (`fk_faixa_etaria` ASC) VISIBLE,
   INDEX `fk_caixa_pedido1_idx` (`fk_pedido` ASC) VISIBLE,
   CONSTRAINT `fk_caixa_faixa_etaria1`
@@ -88,26 +74,24 @@ CREATE TABLE IF NOT EXISTS `db_9solutions`.`caixa` (
     REFERENCES `db_9solutions`.`pedido` (`idpedido`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
+    
 
-
--- -----------------------------------------------------
--- Table `db_9solutions`.`categoria_produto`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `db_9solutions`.`categoria_produto` (
   `id_categoria_produto` INT NOT NULL AUTO_INCREMENT,
   `nome` VARCHAR(40) NOT NULL,
+  `condicao` TINYINT NOT NULL,
+  `qtde_produtos` INT NOT NULL,
+  `estagio` tinyint NOT NULL ,
   PRIMARY KEY (`id_categoria_produto`));
-
-
--- -----------------------------------------------------
--- Table `db_9solutions`.`produto`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `db_9solutions`.`produto` (
+  
+  
+  CREATE TABLE IF NOT EXISTS `db_9solutions`.`produto` (
   `id_produto` INT NOT NULL AUTO_INCREMENT,
   `nome` VARCHAR(40) NULL DEFAULT NULL,
   `valor` DECIMAL(5,2) NULL DEFAULT NULL,
   `genero` CHAR NULL,
-  `ativo` TINYINT NULL,
+  `condicao` TINYINT NOT NULL,
+  `url_imagem` VARCHAR(256) NOT NULL, 
   `fk_categoria_produto` INT NOT NULL,
   `fk_faixa_etaria` INT NOT NULL,
   PRIMARY KEY (`id_produto`, `fk_categoria_produto`, `fk_faixa_etaria`),
@@ -123,11 +107,8 @@ CREATE TABLE IF NOT EXISTS `db_9solutions`.`produto` (
     REFERENCES `db_9solutions`.`faixa_etaria` (`id_faixa_etaria`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
-
-
--- -----------------------------------------------------
--- Table `db_9solutions`.`item_caixa`
--- -----------------------------------------------------
+    
+    
 CREATE TABLE IF NOT EXISTS `db_9solutions`.`item_caixa` (
   `id_produto_caixa` INT NOT NULL AUTO_INCREMENT,
   `fk_caixa` INT NULL DEFAULT NULL,
@@ -141,11 +122,8 @@ CREATE TABLE IF NOT EXISTS `db_9solutions`.`item_caixa` (
   CONSTRAINT `fk_tbItemCaixa_tbItem`
     FOREIGN KEY (`fk_produto`)
     REFERENCES `db_9solutions`.`produto` (`id_produto`));
-
-
--- -----------------------------------------------------
--- Table `db_9solutions`.`metodo_pagamento`
--- -----------------------------------------------------
+  
+  
 CREATE TABLE IF NOT EXISTS `db_9solutions`.`metodo_pagamento` (
   `id_metodo_pagamento` INT NOT NULL,
   `tipo` VARCHAR(45) NULL,
@@ -153,15 +131,12 @@ CREATE TABLE IF NOT EXISTS `db_9solutions`.`metodo_pagamento` (
 ENGINE = InnoDB;
 
 
--- -----------------------------------------------------
--- Table `db_9solutions`.`metodo_pagamento_pedido`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `db_9solutions`.`metodo_pagamento_pedido` (
   `fk_metodo_pagamento` INT NOT NULL,
   `fk_pedido` INT NOT NULL,
   `provedor` VARCHAR(45) NULL,
   `numero_conta` VARCHAR(45) NULL,
-  `data_expiracao` DATETIME NULL,
+  `data_expiracao` DATE NULL,
   PRIMARY KEY (`fk_metodo_pagamento`, `fk_pedido`),
   INDEX `fk_doador_has_tipo_pagamento_tipo_pagamento1_idx` (`fk_metodo_pagamento` ASC) VISIBLE,
   INDEX `fk_metodo_pagamento_doador_pedido1_idx` (`fk_pedido` ASC) VISIBLE,
@@ -175,12 +150,74 @@ CREATE TABLE IF NOT EXISTS `db_9solutions`.`metodo_pagamento_pedido` (
     REFERENCES `db_9solutions`.`pedido` (`idpedido`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
+    
+    
+CREATE TABLE IF NOT EXISTS `db_9solutions`.`cupom` (
+  `id_cupom` INT NOT NULL,
+  `codigo` VARCHAR(45) NULL,
+  `desconto_percentual` DECIMAL(5,2) NULL,
+  `desconto_fixo` DECIMAL(10,2) NULL,
+  `validade_inicio` DATE NULL,
+  `validade_fim` DATE NULL,
+  `limite_usos` INT NULL,
+  `usos_atuais` INT NULL,
+  `ativo` TINYINT NULL,
+  PRIMARY KEY (`id_cupom`))
+ENGINE = InnoDB;
 
+
+CREATE TABLE IF NOT EXISTS `db_9solutions`.`cupom_pedido` (
+  `id_cupom_pedido` INT NOT NULL,
+  `cupom_id_cupom` INT NOT NULL,
+  `pedido_idpedido` INT NOT NULL,
+  PRIMARY KEY (`id_cupom_pedido`, `cupom_id_cupom`, `pedido_idpedido`),
+  INDEX `fk_cupom_pedido_cupom1_idx` (`cupom_id_cupom` ASC) VISIBLE,
+  INDEX `fk_cupom_pedido_pedido1_idx` (`pedido_idpedido` ASC) VISIBLE,
+  CONSTRAINT `fk_cupom_pedido_cupom1`
+    FOREIGN KEY (`cupom_id_cupom`)
+    REFERENCES `db_9solutions`.`cupom` (`id_cupom`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_cupom_pedido_pedido1`
+    FOREIGN KEY (`pedido_idpedido`)
+    REFERENCES `db_9solutions`.`pedido` (`idpedido`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+CREATE TABLE IF NOT EXISTS `db_9solutions`.`status_caixa` (
+  `id_status_caixa` INT NOT NULL,
+  `status` VARCHAR(45) NULL,
+  PRIMARY KEY (`id_status_caixa`))
+ENGINE = InnoDB;
+
+
+CREATE TABLE IF NOT EXISTS `db_9solutions`.`etapa_caixa` (
+  `id_etapa_caixa` int not null auto_increment,
+  `fk_status` INT NOT NULL,
+  `fk_id_caixa` INT NOT NULL,
+  `update_at` DATE NULL,
+  PRIMARY KEY (`id_etapa_caixa`),
+  INDEX `fk_status_caixa_has_caixa_caixa1_idx` (`fk_id_caixa` ASC) VISIBLE,
+  INDEX `fk_status_caixa_has_caixa_status_caixa1_idx` (`fk_status` ASC) VISIBLE,
+  CONSTRAINT `fk_status_caixa_has_caixa_status_caixa1`
+    FOREIGN KEY (`fk_status`)
+    REFERENCES `db_9solutions`.`status_caixa` (`id_status_caixa`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_status_caixa_has_caixa_caixa1`
+    FOREIGN KEY (`fk_id_caixa`)
+    REFERENCES `db_9solutions`.`caixa` (`id_caixa`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- CRIAÇÃO DAS VIEWS
+-- -----------------------------------------------------
 USE `db_9solutions` ;
-
--- VIEWS -------------------------------------------------
-
--- View para KPI de qtd de caixas para serem montadas
 CREATE VIEW vw_caixas_em_montagem AS
 SELECT 
     COUNT(c.id_caixa) AS quantidade_caixas_em_montagem
@@ -191,9 +228,7 @@ FROM
 WHERE 
     sp.status = 'Em montagem';
     
-SELECT * FROM vw_caixas_em_montagem;
-    
--- View para KPI de qtd de caixas para serem entregues
+
 CREATE VIEW vw_caixas_para_entregar AS
 SELECT 
     COUNT(c.id_caixa) AS quantidade_caixas_para_entregar
@@ -204,10 +239,7 @@ FROM
 WHERE 
     sp.status = 'Pronto para Entrega';
     
-SELECT * FROM vw_caixas_para_entregar;
     
-    
--- vw para KPI de quantidade de caixas ATRASADAS
 CREATE VIEW vw_caixas_atrasadas AS
 SELECT 
     COUNT(c.id_caixa) AS quantidade_caixas_atrasadas
@@ -218,10 +250,8 @@ FROM
 WHERE 
     p.data_pedido < NOW() - INTERVAL 2 WEEK
     AND sp.status != 'Entregue';
-    
-select * from vw_caixas_atrasadas;
 
--- view para qtd de pedidos por faixa etaria por meses do ano
+
 CREATE VIEW vw_qtd_pedidos_por_faixa_etaria AS
 SELECT 
     YEAR(p.data_pedido) AS ano,
@@ -239,10 +269,7 @@ GROUP BY
 ORDER BY 
     ano, mes, fe.faixa_nome;
     
-select * from vw_qtd_pedidos_por_faixa_etaria;
     
-    
--- view para buscar a qtd de pedidos por meses do ano
 CREATE VIEW vw_pedidos_por_mes AS
 SELECT 
     p.idpedido,
@@ -257,11 +284,8 @@ FROM
     pedido p
 ORDER BY 
     ano, mes, dia;
-
-select * from vw_pedidos_por_mes;
-
--- view de qtd de produtos doados por categoria em um intervalo de tempo (Exeplo usado: doces por ano)
-
+    
+    
 CREATE VIEW vw_qtd_produtos_por_categoria AS
 SELECT 
     YEAR(p.data_pedido) AS ano,
@@ -283,36 +307,71 @@ GROUP BY
 ORDER BY 
     ano, produto;
     
-select * from vw_qtd_produtos_por_categoria;
 
+DROP TABLE IF EXISTS `db_9solutions`.`vw_filtros_pedidos`;
+CREATE OR REPLACE VIEW `vw_filtros_pedidos` AS
+SELECT * FROM pedido 
+INNER JOIN status_pedido ON pedido.fk_status_pedido = status_pedido.id_status_pedido
+INNER JOIn doador ON pedido.fk_doador = doador.id_doador;
 
--- INSERTS PARA TESTE -------------------------------------
-INSERT INTO faixa_etaria (faixa_nome, limite_inferior, limite_superior) VALUES 
-('Criança', 0, 12),
-('Adolescente', 13, 18);
+-- -----------------------------------------------------
+-- INSERINDO DADOS
+-- -----------------------------------------------------
+INSERT INTO `db_9solutions`.`faixa_etaria` (`faixa_nome`, `limite_inferior`, `limite_superior`, `condicao`)
+VALUES
+('Criança', 2, 5, 1),
+('Pré-Adolescente', 6, 10, 1),
+('Adolescente', 11, 15, 1);
 
--- Inserir dados na tabela status_pedido
-INSERT INTO status_pedido (id_status_pedido, status) VALUES 
-(1, 'Novo'),
-(2, 'Em montagem'),
+INSERT INTO `db_9solutions`.`status_pedido` (`id_status_pedido`, `status`)
+VALUES
+(1, 'Pendente'),
+(2, 'Processando'),
 (3, 'Enviado'),
+(4, 'Entregue'),
+(5, 'Cancelado');
+
+INSERT INTO `db_9solutions`.`categoria_produto` (`nome`, `qtde_produtos`, `condicao`, `estagio`)
+VALUES
+('Itens Diversos', 3, 1, 2),
+('Uso Pessoal', 1, 1, 1),
+('Higiene Pessoal', 1, 1, 1),
+('Brinquedo', 1, 1, 2),
+('Doces', 3, 1, 3),
+('Material Escolar', 1, 1, 2);
+
+INSERT INTO `db_9solutions`.`status_caixa` (`id_status_caixa`, `status`)
+VALUES
+(1, 'Pronta para montagem'),
+(2, 'Em Montagem'),
+(3, 'Pronta para entrega'),
 (4, 'Entregue');
 
--- Inserir dados na tabela doador
+INSERT INTO `db_9solutions`.`produto` (`nome`, `valor`, `genero`, `ativo`, `fk_categoria_produto`, `fk_faixa_etaria`, `url_imagem`)
+VALUES
+('Camiseta', 29.99, 'F', 1, 2, 2, 'foto_do_produto.jpg'),
+('Laptop', 150.00, 'F', 1, 1, 1, 'foto_do_produto.jpg'),
+('Livro de Ficção', 19.99, 'M', 1, 6, 2, 'foto_do_produto.jpg'),
+('Bicicleta Infantil', 300.00, 'M', 1, 5, 1, 'foto_do_produto.jpg'),
+('Creme Hidratante', 25.50, 'F', 1, 6, 2, 'foto_do_produto.jpg'),
+('Carrinho de Controle Remoto', 50.00, 'M', 1, 5, 1, 'foto_do_produto.jpg'),
+('Balas', 1.00, 'F', 1, 4, 1, 'foto_do_produto.jpg');
+
 INSERT INTO doador (nome_completo, identificador, email, telefone, senha) VALUES 
 ('João Silva', '12345678901234', 'joao.silva@example.com', '11123456789', 'senha123'),
 ('Maria Oliveira', '23456789012345', 'maria.oliveira@example.com', '22123456789', 'senha456');
 
--- Inserir dados na tabela pedido
 INSERT INTO pedido (idpedido, data_pedido, valor_total, fk_status_pedido, fk_doador) VALUES 
-(5, '2023-01-01 10:00:00', 100.00, 4, 1),
-(6, '2023-02-01 11:00:00', 200.00, 4, 2),
-(7, '2023-03-01 12:00:00', 150.00, 4, 1),
-(8, '2023-04-01 13:00:00', 250.00, 4, 2);
+(5, '2023-01-01', 100.00, 4, 1),
+(6, '2023-02-01', 200.00, 4, 2),
+(7, '2023-03-01', 150.00, 4, 1),
+(8, '2023-04-01', 250.00, 4, 2);
 
--- Inserir dados na tabela caixa
 INSERT INTO caixa (genero, carta, url, dt_criacao, dt_entrega, qtd, fk_faixa_etaria, fk_pedido) VALUES 
-('M', 'Carta 1', 'http://example.com/1', '2023-01-02 10:00:00', NULL, 5, 1, 5),
-('F', 'Carta 2', 'http://example.com/2', '2023-02-02 11:00:00', NULL, 10, 2, 6),
-('M', 'Carta 3', 'http://example.com/3', '2023-03-02 12:00:00', NULL, 7, 1, 7),
-('F', 'Carta 4', 'http://example.com/4', '2023-04-02 13:00:00', NULL, 12, 2, 8);
+('M', 'Carta 1', 'http://example.com/1', '2023-01-02', NULL, 5, 1, 1),
+('F', 'Carta 2', 'http://example.com/2', '2023-02-02', NULL, 10, 2, 2),
+('M', 'Carta 3', 'http://example.com/3', '2023-03-02', NULL, 7, 1, 3),
+('F', 'Carta 4', 'http://example.com/4', '2023-04-02', NULL, 12, 3, 4);
+
+
+
