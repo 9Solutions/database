@@ -344,10 +344,8 @@ VALUES
 INSERT INTO `db_9solutions`.`status_pedido` (`id_status_pedido`, `status`)
 VALUES
 (1, 'Pendente'),
-(2, 'Processando'),
-(3, 'Enviado'),
-(4, 'Entregue'),
-(5, 'Cancelado');
+(2, 'Enviado'),
+(3, 'Entregue');
 
 INSERT INTO `db_9solutions`.`categoria_produto` (`nome`, `qtde_produtos`, `condicao`, `estagio`)
 VALUES
@@ -361,9 +359,8 @@ VALUES
 INSERT INTO `db_9solutions`.`status_caixa` (`id_status_caixa`, `status`)
 VALUES
 (1, 'Pronta para montagem'),
-(2, 'Em Montagem'),
-(3, 'Pronta para entrega'),
-(4, 'Entregue');
+(2, 'Pronta para entrega'),
+(3, 'Entregue');
 
 INSERT INTO `db_9solutions`.`produto` (`nome`, `valor`, `genero`, `ativo`, `fk_categoria_produto`, `fk_faixa_etaria`, `url_imagem`)
 VALUES
