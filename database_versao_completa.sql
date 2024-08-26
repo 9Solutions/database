@@ -151,7 +151,13 @@ CREATE TABLE IF NOT EXISTS `db_9solutions`.`metodo_pagamento_pedido` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
     
-    
+CREATE TABLE IF NOT EXISTS `db_9solutions`.`empresa` (
+  `id_empresa` INT NOT NULL,
+  `nome` VARCHAR(100) NULL,
+  `email_contato` VARCHAR(200) NULL,
+  PRIMARY KEY (`id_empresa`))
+ENGINE = InnoDB;
+
 CREATE TABLE IF NOT EXISTS `db_9solutions`.`cupom` (
   `id_cupom` INT NOT NULL,
   `codigo` VARCHAR(45) NULL,
@@ -162,7 +168,10 @@ CREATE TABLE IF NOT EXISTS `db_9solutions`.`cupom` (
   `limite_usos` INT NULL,
   `usos_atuais` INT NULL,
   `ativo` TINYINT NULL,
-  PRIMARY KEY (`id_cupom`))
+  `fk_empresa` INT NOT NULL,
+  PRIMARY KEY (`id_cupom`),
+    FOREIGN KEY (`fk_empresa`)
+    REFERENCES `db_9solutions`.`empresa` (`id_produto`))
 ENGINE = InnoDB;
 
 
