@@ -151,10 +151,6 @@ CREATE TABLE IF NOT EXISTS `db_9solutions`.`metodo_pagamento_pedido` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
     
-<<<<<<< HEAD
-    
-=======
->>>>>>> 0a96ccbaf12d123d417f28682e114ec8731adf63
 CREATE TABLE IF NOT EXISTS `db_9solutions`.`empresa` (
   `id_empresa` INT NOT NULL,
   `nome` VARCHAR(100) NULL,
@@ -162,10 +158,6 @@ CREATE TABLE IF NOT EXISTS `db_9solutions`.`empresa` (
   PRIMARY KEY (`id_empresa`))
 ENGINE = InnoDB;
 
-<<<<<<< HEAD
-    
-=======
->>>>>>> 0a96ccbaf12d123d417f28682e114ec8731adf63
 CREATE TABLE IF NOT EXISTS `db_9solutions`.`cupom` (
   `id_cupom` INT NOT NULL,
   `codigo` VARCHAR(45) NULL,
@@ -176,17 +168,10 @@ CREATE TABLE IF NOT EXISTS `db_9solutions`.`cupom` (
   `limite_usos` INT NULL,
   `usos_atuais` INT NULL,
   `ativo` TINYINT NULL,
-<<<<<<< HEAD
 	`fk_empresa` INT NOT NULL,
   PRIMARY KEY (`id_cupom`),
     FOREIGN KEY (`fk_empresa`)
     REFERENCES `db_9solutions`.`empresa` (`id_empresa`))
-=======
-  `fk_empresa` INT NOT NULL,
-  PRIMARY KEY (`id_cupom`),
-    FOREIGN KEY (`fk_empresa`)
-    REFERENCES `db_9solutions`.`empresa` (`id_produto`))
->>>>>>> 0a96ccbaf12d123d417f28682e114ec8731adf63
 ENGINE = InnoDB;
 
 
