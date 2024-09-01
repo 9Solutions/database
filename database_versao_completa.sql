@@ -151,7 +151,10 @@ CREATE TABLE IF NOT EXISTS `db_9solutions`.`metodo_pagamento_pedido` (
     ON DELETE NO ACTION
     ON UPDATE NO ACTION);
     
+<<<<<<< HEAD
     
+=======
+>>>>>>> 0a96ccbaf12d123d417f28682e114ec8731adf63
 CREATE TABLE IF NOT EXISTS `db_9solutions`.`empresa` (
   `id_empresa` INT NOT NULL,
   `nome` VARCHAR(100) NULL,
@@ -159,7 +162,10 @@ CREATE TABLE IF NOT EXISTS `db_9solutions`.`empresa` (
   PRIMARY KEY (`id_empresa`))
 ENGINE = InnoDB;
 
+<<<<<<< HEAD
     
+=======
+>>>>>>> 0a96ccbaf12d123d417f28682e114ec8731adf63
 CREATE TABLE IF NOT EXISTS `db_9solutions`.`cupom` (
   `id_cupom` INT NOT NULL,
   `codigo` VARCHAR(45) NULL,
@@ -170,10 +176,17 @@ CREATE TABLE IF NOT EXISTS `db_9solutions`.`cupom` (
   `limite_usos` INT NULL,
   `usos_atuais` INT NULL,
   `ativo` TINYINT NULL,
+<<<<<<< HEAD
 	`fk_empresa` INT NOT NULL,
   PRIMARY KEY (`id_cupom`),
     FOREIGN KEY (`fk_empresa`)
     REFERENCES `db_9solutions`.`empresa` (`id_empresa`))
+=======
+  `fk_empresa` INT NOT NULL,
+  PRIMARY KEY (`id_cupom`),
+    FOREIGN KEY (`fk_empresa`)
+    REFERENCES `db_9solutions`.`empresa` (`id_produto`))
+>>>>>>> 0a96ccbaf12d123d417f28682e114ec8731adf63
 ENGINE = InnoDB;
 
 
@@ -325,6 +338,24 @@ SELECT * FROM pedido
 INNER JOIN status_pedido ON pedido.fk_status_pedido = status_pedido.id_status_pedido
 INNER JOIn doador ON pedido.fk_doador = doador.id_doador;
 
+
+
+ALTER TABLE caixa 
+ADD COLUMN qr_code_token CHAR(64) NULL;
+
+DELIMITER //
+
+CREATE TRIGGER set_default_qrcode_token
+BEFORE INSERT ON caixa
+FOR EACH ROW
+BEGIN
+    IF NEW.qr_code_token IS NULL THEN
+        SET NEW.qr_code_token = SHA2(UNIX_TIMESTAMP(), 256);
+    END IF;
+END //
+
+DELIMITER ;
+
 -- -----------------------------------------------------
 -- INSERINDO DADOS
 -- -----------------------------------------------------
@@ -337,10 +368,8 @@ VALUES
 INSERT INTO `db_9solutions`.`status_pedido` (`id_status_pedido`, `status`)
 VALUES
 (1, 'Pendente'),
-(2, 'Processando'),
-(3, 'Enviado'),
-(4, 'Entregue'),
-(5, 'Cancelado');
+(2, 'Enviado'),
+(3, 'Entregue');
 
 INSERT INTO `db_9solutions`.`categoria_produto` (`nome`, `qtde_produtos`, `condicao`, `estagio`)
 VALUES
@@ -354,9 +383,8 @@ VALUES
 INSERT INTO `db_9solutions`.`status_caixa` (`id_status_caixa`, `status`)
 VALUES
 (1, 'Pronta para montagem'),
-(2, 'Em Montagem'),
-(3, 'Pronta para entrega'),
-(4, 'Entregue');
+(2, 'Pronta para entrega'),
+(3, 'Entregue');
 
 INSERT INTO `db_9solutions`.`produto` (`nome`, `valor`, `genero`, `condicao`, `fk_categoria_produto`, `fk_faixa_etaria`, `url_imagem`)
 VALUES
