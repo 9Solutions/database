@@ -152,6 +152,14 @@ CREATE TABLE IF NOT EXISTS `db_9solutions`.`metodo_pagamento_pedido` (
     ON UPDATE NO ACTION);
     
     
+CREATE TABLE IF NOT EXISTS `db_9solutions`.`empresa` (
+  `id_empresa` INT NOT NULL,
+  `nome` VARCHAR(100) NULL,
+  `email_contato` VARCHAR(200) NULL,
+  PRIMARY KEY (`id_empresa`))
+ENGINE = InnoDB;
+
+    
 CREATE TABLE IF NOT EXISTS `db_9solutions`.`cupom` (
   `id_cupom` INT NOT NULL,
   `codigo` VARCHAR(45) NULL,
@@ -162,7 +170,10 @@ CREATE TABLE IF NOT EXISTS `db_9solutions`.`cupom` (
   `limite_usos` INT NULL,
   `usos_atuais` INT NULL,
   `ativo` TINYINT NULL,
-  PRIMARY KEY (`id_cupom`))
+	`fk_empresa` INT NOT NULL,
+  PRIMARY KEY (`id_cupom`),
+    FOREIGN KEY (`fk_empresa`)
+    REFERENCES `db_9solutions`.`empresa` (`id_empresa`))
 ENGINE = InnoDB;
 
 
@@ -319,9 +330,9 @@ INNER JOIn doador ON pedido.fk_doador = doador.id_doador;
 -- -----------------------------------------------------
 INSERT INTO `db_9solutions`.`faixa_etaria` (`faixa_nome`, `limite_inferior`, `limite_superior`, `condicao`)
 VALUES
-('Criança', 2, 5, 1),
-('Pré-Adolescente', 6, 10, 1),
-('Adolescente', 11, 15, 1);
+('Criança', 2, 4, 1),
+('Pré-Adolescente', 5, 9, 1),
+('Adolescente', 10, 14, 1);
 
 INSERT INTO `db_9solutions`.`status_pedido` (`id_status_pedido`, `status`)
 VALUES
@@ -333,12 +344,12 @@ VALUES
 
 INSERT INTO `db_9solutions`.`categoria_produto` (`nome`, `qtde_produtos`, `condicao`, `estagio`)
 VALUES
-('Itens Diversos', 3, 1, 2),
-('Uso Pessoal', 1, 1, 1),
-('Higiene Pessoal', 1, 1, 1),
-('Brinquedo', 1, 1, 2),
-('Doces', 3, 1, 3),
-('Material Escolar', 1, 1, 2);
+('Brinquedo', 1, 1, 1),
+('Material Escolar', 1, 1, 1),
+('Higiene Pessoal', 1, 1, 2),
+('Uso Pessoal', 1, 1, 2),
+('Itens Diversos', 3, 1, 3),
+('Doces', 3, 1, 3);
 
 INSERT INTO `db_9solutions`.`status_caixa` (`id_status_caixa`, `status`)
 VALUES
@@ -347,31 +358,174 @@ VALUES
 (3, 'Pronta para entrega'),
 (4, 'Entregue');
 
-INSERT INTO `db_9solutions`.`produto` (`nome`, `valor`, `genero`, `ativo`, `fk_categoria_produto`, `fk_faixa_etaria`, `url_imagem`)
+INSERT INTO `db_9solutions`.`produto` (`nome`, `valor`, `genero`, `condicao`, `fk_categoria_produto`, `fk_faixa_etaria`, `url_imagem`)
 VALUES
-('Camiseta', 29.99, 'F', 1, 2, 2, 'foto_do_produto.jpg'),
-('Laptop', 150.00, 'F', 1, 1, 1, 'foto_do_produto.jpg'),
-('Livro de Ficção', 19.99, 'M', 1, 6, 2, 'foto_do_produto.jpg'),
-('Bicicleta Infantil', 300.00, 'M', 1, 5, 1, 'foto_do_produto.jpg'),
-('Creme Hidratante', 25.50, 'F', 1, 6, 2, 'foto_do_produto.jpg'),
-('Carrinho de Controle Remoto', 50.00, 'M', 1, 5, 1, 'foto_do_produto.jpg'),
-('Balas', 1.00, 'F', 1, 4, 1, 'foto_do_produto.jpg');
+-- Menino de 2 a 4 anos
+('Carrinho', 29.99, 'M', 1, 1, 1, 'foto_do_produto.jpg'),
+('Jogo de Montar', 29.99, 'M', 1, 1, 1, 'foto_do_produto.jpg'),
+('Educação Infantil', 29.99, 'M', 1, 2, 1, 'foto_do_produto.jpg'),
+('Ensino Fundamental 1', 29.99, 'M', 1, 2, 1, 'foto_do_produto.jpg'),
+('Kit Dental Infantil', 29.99, 'M', 1, 3, 1, 'foto_do_produto.jpg'),
+('Sabão Infantil', 29.99, 'M', 1, 3, 1, 'foto_do_produto.jpg'),
+('Toalinha', 29.99, 'M', 1, 3, 1, 'foto_do_produto.jpg'),
+('Blusa', 29.99, 'M', 1, 4, 1, 'foto_do_produto.jpg'),
+('Chinelinho', 29.99, 'M', 1, 4, 1, 'foto_do_produto.jpg'),
+('Shorts', 29.99, 'M', 1, 4, 1, 'foto_do_produto.jpg'),
+('Ioio', 29.99, 'M', 1, 5, 1, 'foto_do_produto.jpg'),
+('Estojo', 29.99, 'M', 1, 5, 1, 'foto_do_produto.jpg'),
+('Garrafinha', 29.99, 'M', 1, 5, 1, 'foto_do_produto.jpg'),
+('Caderninho', 29.99, 'M', 1, 5, 1, 'foto_do_produto.jpg'),
+('Canetinhas', 29.99, 'M', 1, 5, 1, 'foto_do_produto.jpg'),
+('Short', 29.99, 'M', 1, 5, 1, 'foto_do_produto.jpg'),
+('Balas', 29.99, 'M', 1, 6, 1, 'foto_do_produto.jpg'),
+('Pirulitos', 29.99, 'M', 1, 6, 1, 'foto_do_produto.jpg'),
+('Chocolate', 29.99, 'M', 1, 6, 1, 'foto_do_produto.jpg'),
+('Biscoitos', 29.99, 'M', 1, 6, 1, 'foto_do_produto.jpg'),
+('Bala de Goma', 29.99, 'M', 1, 6, 1, 'foto_do_produto.jpg'),
+('Bombom', 29.99, 'M', 1, 6, 1, 'foto_do_produto.jpg'),
 
-INSERT INTO doador (nome_completo, identificador, email, telefone, senha) VALUES 
-('João Silva', '12345678901234', 'joao.silva@example.com', '11123456789', 'senha123'),
-('Maria Oliveira', '23456789012345', 'maria.oliveira@example.com', '22123456789', 'senha456');
+-- Menino de 5 a 9
+('Carrinho', 29.99, 'M', 1, 1, 2, 'foto_do_produto.jpg'),
+('Jogo de Montar', 29.99, 'M', 1, 1, 2, 'foto_do_produto.jpg'),
+('Educação Infantil', 29.99, 'M', 1, 2, 2, 'foto_do_produto.jpg'),
+('Ensino Fundamental 1', 29.99, 'M', 1, 2, 2, 'foto_do_produto.jpg'),
+('Kit Dental Infantil', 29.99, 'M', 1, 3, 2, 'foto_do_produto.jpg'),
+('Sabão Infantil', 29.99, 'M', 1, 3, 2, 'foto_do_produto.jpg'),
+('Toalinha', 29.99, 'M', 1, 3, 2, 'foto_do_produto.jpg'),
+('Blusa', 29.99, 'M', 1, 4, 2, 'foto_do_produto.jpg'),
+('Chinelinho', 29.99, 'M', 1, 4, 2, 'foto_do_produto.jpg'),
+('Shorts', 29.99, 'M', 1, 4, 2, 'foto_do_produto.jpg'),
+('Ioio', 29.99, 'M', 1, 5, 2, 'foto_do_produto.jpg'),
+('Estojo', 29.99, 'M', 1, 5, 2, 'foto_do_produto.jpg'),
+('Garrafinha', 29.99, 'M', 1, 5, 2, 'foto_do_produto.jpg'),
+('Caderninho', 29.99, 'M', 1, 5, 2, 'foto_do_produto.jpg'),
+('Canetinhas', 29.99, 'M', 1, 5, 2, 'foto_do_produto.jpg'),
+('Short', 29.99, 'M', 1, 5, 2, 'foto_do_produto.jpg'),
+('Balas', 29.99, 'M', 1, 6, 2, 'foto_do_produto.jpg'),
+('Pirulitos', 29.99, 'M', 1, 6, 2, 'foto_do_produto.jpg'),
+('Chocolate', 29.99, 'M', 1, 6, 2, 'foto_do_produto.jpg'),
+('Biscoitos', 29.99, 'M', 1, 6, 2, 'foto_do_produto.jpg'),
+('Bala de Goma', 29.99, 'M', 1, 6, 2, 'foto_do_produto.jpg'),
+('Bombom', 29.99, 'M', 1, 6, 2, 'foto_do_produto.jpg'),
 
-INSERT INTO pedido (idpedido, data_pedido, valor_total, fk_status_pedido, fk_doador) VALUES 
-(5, '2023-01-01', 100.00, 4, 1),
-(6, '2023-02-01', 200.00, 4, 2),
-(7, '2023-03-01', 150.00, 4, 1),
-(8, '2023-04-01', 250.00, 4, 2);
+-- Menino de 10 a 14
+('Kit Ping Pong', 29.99, 'M', 1, 1, 3, 'foto_do_produto.jpg'),
+('Jogos', 29.99, 'M', 1, 1, 3, 'foto_do_produto.jpg'),
+('Ensino Fundamental 1', 29.99, 'M', 1, 2, 3, 'foto_do_produto.jpg'),
+('Ensino Fundamental 2', 29.99, 'M', 1, 2, 3, 'foto_do_produto.jpg'),
+('Kit Dental Pré Teen', 29.99, 'M', 1, 3, 3, 'foto_do_produto.jpg'),
+('Sabonete', 29.99, 'M', 1, 3, 3, 'foto_do_produto.jpg'),
+('Pente', 29.99, 'M', 1, 3, 3, 'foto_do_produto.jpg'),
+('Blusa', 29.99, 'M', 1, 4, 3, 'foto_do_produto.jpg'),
+('Chinelinho', 29.99, 'M', 1, 4, 3, 'foto_do_produto.jpg'),
+('Shorts', 29.99, 'M', 1, 4, 3, 'foto_do_produto.jpg'),
+('Ioio', 29.99, 'M', 1, 5, 3, 'foto_do_produto.jpg'),
+('Estojo', 29.99, 'M', 1, 5, 3, 'foto_do_produto.jpg'),
+('Garrafinha', 29.99, 'M', 1, 5, 3, 'foto_do_produto.jpg'),
+('Caderninho', 29.99, 'M', 1, 5, 3, 'foto_do_produto.jpg'),
+('Canetinhas', 29.99, 'M', 1, 5, 3, 'foto_do_produto.jpg'),
+('Short', 29.99, 'M', 1, 5, 3, 'foto_do_produto.jpg'),
+('Balas', 29.99, 'M', 1, 6, 3, 'foto_do_produto.jpg'),
+('Pirulitos', 29.99, 'M', 1, 6, 3, 'foto_do_produto.jpg'),
+('Chocolate', 29.99, 'M', 1, 6, 3, 'foto_do_produto.jpg'),
+('Biscoitos', 29.99, 'M', 1, 6, 3, 'foto_do_produto.jpg'),
+('Bala de Goma', 29.99, 'M', 1, 6, 3, 'foto_do_produto.jpg'),
+('Bombom', 29.99, 'M', 1, 6, 3, 'foto_do_produto.jpg');
+
+
+-- Dados para menina
+INSERT INTO `db_9solutions`.`produto` (`nome`, `valor`, `genero`, `condicao`, `fk_categoria_produto`, `fk_faixa_etaria`, `url_imagem`)
+VALUES
+-- Menina de 2 a 4 anos
+('Bonequinha', 29.99, 'F', 1, 1, 1, 'foto_do_produto.jpg'),
+('Jogo de Montar', 29.99, 'F', 1, 1, 1, 'foto_do_produto.jpg'),
+('Educação Infantil', 29.99, 'F', 1, 2, 1, 'foto_do_produto.jpg'),
+('Ensino Fundamental 1', 29.99, 'F', 1, 2, 1, 'foto_do_produto.jpg'),
+('Kit Dental Infantil', 29.99, 'F', 1, 3, 1, 'foto_do_produto.jpg'),
+('Sabão Infantil', 29.99, 'F', 1, 3, 1, 'foto_do_produto.jpg'),
+('Toalinha', 29.99, 'F', 1, 3, 1, 'foto_do_produto.jpg'),
+('Blusa', 29.99, 'F', 1, 4, 1, 'foto_do_produto.jpg'),
+('Chinelinho', 29.99, 'F', 1, 4, 1, 'foto_do_produto.jpg'),
+('Shorts', 29.99, 'F', 1, 4, 1, 'foto_do_produto.jpg'),
+('Itens para Cabelo', 29.99, 'F', 1, 5, 1, 'foto_do_produto.jpg'),
+('Estojo', 29.99, 'F', 1, 5, 1, 'foto_do_produto.jpg'),
+('Garrafinha', 29.99, 'F', 1, 5, 1, 'foto_do_produto.jpg'),
+('Caderninho', 29.99, 'F', 1, 5, 1, 'foto_do_produto.jpg'),
+('Canetinhas', 29.99, 'F', 1, 5, 1, 'foto_do_produto.jpg'),
+('Short', 29.99, 'F', 1, 5, 1, 'foto_do_produto.jpg'),
+('Balas', 29.99, 'F', 1, 6, 1, 'foto_do_produto.jpg'),
+('Pirulitos', 29.99, 'F', 1, 6, 1, 'foto_do_produto.jpg'),
+('Chocolate', 29.99, 'F', 1, 6, 1, 'foto_do_produto.jpg'),
+('Biscoitos', 29.99, 'F', 1, 6, 1, 'foto_do_produto.jpg'),
+('Bala de Goma', 29.99, 'F', 1, 6, 1, 'foto_do_produto.jpg'),
+('Bombom', 29.99, 'F', 1, 6, 1, 'foto_do_produto.jpg'),
+
+-- Menino de 5 a 9
+('Boneca', 29.99, 'F', 1, 1, 2, 'foto_do_produto.jpg'),
+('Jogos', 29.99, 'F', 1, 1, 2, 'foto_do_produto.jpg'),
+('Educação Infantil', 29.99, 'F', 1, 2, 2, 'foto_do_produto.jpg'),
+('Ensino Fundamental 1', 29.99, 'F', 1, 2, 2, 'foto_do_produto.jpg'),
+('Kit Dental', 29.99, 'F', 1, 3, 2, 'foto_do_produto.jpg'),
+('Sabão Infantil', 29.99, 'F', 1, 3, 2, 'foto_do_produto.jpg'),
+('Toalinha', 29.99, 'F', 1, 3, 2, 'foto_do_produto.jpg'),
+('Blusa', 29.99, 'F', 1, 4, 2, 'foto_do_produto.jpg'),
+('Chinelinho', 29.99, 'F', 1, 4, 2, 'foto_do_produto.jpg'),
+('Shorts', 29.99, 'F', 1, 4, 2, 'foto_do_produto.jpg'),
+('Itens para Cabelo', 29.99, 'F', 1, 5, 2, 'foto_do_produto.jpg'),
+('Estojo', 29.99, 'F', 1, 5, 2, 'foto_do_produto.jpg'),
+('Garrafinha', 29.99, 'F', 1, 5, 2, 'foto_do_produto.jpg'),
+('Caderninho', 29.99, 'F', 1, 5, 2, 'foto_do_produto.jpg'),
+('Canetinhas', 29.99, 'F', 1, 5, 2, 'foto_do_produto.jpg'),
+('Short', 29.99, 'F', 1, 5, 2, 'foto_do_produto.jpg'),
+('Balas', 29.99, 'F', 1, 6, 2, 'foto_do_produto.jpg'),
+('Pirulitos', 29.99, 'F', 1, 6, 2, 'foto_do_produto.jpg'),
+('Chocolate', 29.99, 'F', 1, 6, 2, 'foto_do_produto.jpg'),
+('Biscoitos', 29.99, 'F', 1, 6, 2, 'foto_do_produto.jpg'),
+('Bala de Goma', 29.99, 'F', 1, 6, 2, 'foto_do_produto.jpg'),
+('Bombom', 29.99, 'F', 1, 6, 2, 'foto_do_produto.jpg'),
+
+-- Menino de 10 a 14
+('Kit de Maquiagem', 29.99, 'F', 1, 1, 3, 'foto_do_produto.jpg'),
+('Jogos', 29.99, 'F', 1, 1, 3, 'foto_do_produto.jpg'),
+
+('Ensino Fundamental 1', 29.99, 'F', 1, 2, 3, 'foto_do_produto.jpg'),
+('Ensino Fundamental 2', 29.99, 'F', 1, 2, 3, 'foto_do_produto.jpg'),
+
+('Kit Dental Pré Teen', 29.99, 'F', 1, 3, 3, 'foto_do_produto.jpg'),
+('Escova de Cabelo', 29.99, 'F', 1, 3, 3, 'foto_do_produto.jpg'),
+('Absorvente', 29.99, 'F', 1, 3, 3, 'foto_do_produto.jpg'),
+
+('Blusa', 29.99, 'F', 1, 4, 3, 'foto_do_produto.jpg'),
+('Chinelinho', 29.99, 'F', 1, 4, 3, 'foto_do_produto.jpg'),
+('Shorts', 29.99, 'F', 1, 4, 3, 'foto_do_produto.jpg'),
+
+('Itens para Cabelo', 29.99, 'F', 1, 5, 3, 'foto_do_produto.jpg'),
+('Estojo', 29.99, 'F', 1, 5, 3, 'foto_do_produto.jpg'),
+('Garrafinha', 29.99, 'F', 1, 5, 3, 'foto_do_produto.jpg'),
+('Caderninho', 29.99, 'F', 1, 5, 3, 'foto_do_produto.jpg'),
+('Canetinhas', 29.99, 'F', 1, 5, 3, 'foto_do_produto.jpg'),
+('Short', 29.99, 'F', 1, 5, 3, 'foto_do_produto.jpg'),
+
+('Balas', 29.99, 'F', 1, 6, 3, 'foto_do_produto.jpg'),
+('Pirulitos', 29.99, 'F', 1, 6, 3, 'foto_do_produto.jpg'),
+('Chocolate', 29.99, 'F', 1, 6, 3, 'foto_do_produto.jpg'),
+('Biscoitos', 29.99, 'F', 1, 6, 3, 'foto_do_produto.jpg'),
+('Bala de Goma', 29.99, 'F', 1, 6, 3, 'foto_do_produto.jpg'),
+('Bombom', 29.99, 'F', 1, 6, 3, 'foto_do_produto.jpg');
+
+
+INSERT INTO doador (nome_completo, identificador, email, telefone, senha, permissao) VALUES 
+('João Silva', '12345678901234', 'joao.silva@example.com', '11123456789', 'senha123', 'admin'),
+('Maria Oliveira', '23456789012345', 'maria.oliveira@example.com', '22123456789', 'senha456', 'user');
+
+INSERT INTO pedido (data_pedido, valor_total, fk_status_pedido, fk_doador) VALUES 
+('2023-01-01', 100.00, 4, 1),
+('2023-02-01', 200.00, 4, 2),
+('2023-03-01', 150.00, 4, 1),
+('2023-04-01', 250.00, 4, 2);
 
 INSERT INTO caixa (genero, carta, url, dt_criacao, dt_entrega, qtd, fk_faixa_etaria, fk_pedido) VALUES 
 ('M', 'Carta 1', 'http://example.com/1', '2023-01-02', NULL, 5, 1, 1),
 ('F', 'Carta 2', 'http://example.com/2', '2023-02-02', NULL, 10, 2, 2),
 ('M', 'Carta 3', 'http://example.com/3', '2023-03-02', NULL, 7, 1, 3),
 ('F', 'Carta 4', 'http://example.com/4', '2023-04-02', NULL, 12, 3, 4);
-
-
-
