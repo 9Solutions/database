@@ -337,9 +337,9 @@ BEGIN
     IF NEW.qr_code_token IS NULL THEN
         SET NEW.qr_code_token = SHA2(UNIX_TIMESTAMP(), 256);
     END IF;
-END //
+END//
 
-DELIMITER ;
+DELIMITER ;
 
 -- -----------------------------------------------------
 -- INSERINDO DADOS
