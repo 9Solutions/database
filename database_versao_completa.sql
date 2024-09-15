@@ -332,11 +332,23 @@ ORDER BY
     ano, produto;
     
 
-DROP TABLE IF EXISTS `db_9solutions`.`vw_filtros_pedidos`;
 CREATE OR REPLACE VIEW `vw_filtros_pedidos` AS
-SELECT * FROM pedido 
-INNER JOIN status_pedido ON pedido.fk_status_pedido = status_pedido.id_status_pedido
-INNER JOIn doador ON pedido.fk_doador = doador.id_doador;
+SELECT pedido.*, max_status_caixa.*
+FROM
+    pedido
+    LEFT JOIN (
+        SELECT
+            MAX(etapa_caixa.id_etapa_caixa) AS id_etapa_caixa,
+            MAX(etapa_caixa.fk_status) AS fk_status,
+            MAX(fk_id_caixa) AS idCaixa,
+            MAX(fk_pedido) AS fk_pedido
+        FROM
+            etapa_caixa
+            INNER JOIN caixa ON caixa.id_caixa = etapa_caixa.fk_id_caixa
+        GROUP BY
+            etapa_caixa.fk_id_caixa
+    ) AS max_status_caixa ON max_status_caixa.fk_pedido = pedido.idpedido
+    INNER JOIn doador ON pedido.fk_doador = doador.id_doador;
 
 
 
