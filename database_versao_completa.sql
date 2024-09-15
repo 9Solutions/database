@@ -227,26 +227,41 @@ ENGINE = InnoDB;
 -- CRIAÇÃO DAS VIEWS
 -- -----------------------------------------------------
 USE `db_9solutions` ;
+USE db_9solutions;
+
+DROP VIEW IF EXISTS vw_caixas_em_montagem;
+
 CREATE VIEW vw_caixas_em_montagem AS
-SELECT 
-    COUNT(c.id_caixa) AS quantidade_caixas_em_montagem
-FROM 
-    caixa c
-    INNER JOIN pedido p ON c.fk_pedido = p.idpedido
-    INNER JOIN status_pedido sp ON p.fk_status_pedido = sp.id_status_pedido
-WHERE 
-    sp.status = 'Em montagem';
-    
+    SELECT COUNT(id_etapa_caixa) AS quantidade_caixas_em_montagem 
+    FROM (
+        SELECT 
+            MAX(etapa_caixa.id_etapa_caixa) AS id_etapa_caixa, 
+            MAX(status_caixa.status) AS status 
+        FROM 
+            etapa_caixa
+            INNER JOIN status_caixa ON status_caixa.id_status_caixa = etapa_caixa.fk_status
+        GROUP BY 
+            etapa_caixa.fk_id_caixa
+    ) AS etapas_max_caixas
+    WHERE 
+        etapas_max_caixas.status = 'Pronta para montagem';
+
+DROP VIEW IF EXISTS vw_caixas_para_entregar;
 
 CREATE VIEW vw_caixas_para_entregar AS
-SELECT 
-    COUNT(c.id_caixa) AS quantidade_caixas_para_entregar
-FROM 
-    caixa c
-    INNER JOIN pedido p ON c.fk_pedido = p.idpedido
-    INNER JOIN status_pedido sp ON p.fk_status_pedido = sp.id_status_pedido
-WHERE 
-    sp.status = 'Pronto para Entrega';
+    SELECT COUNT(id_etapa_caixa) AS quantidade_caixas_para_entregar 
+    FROM (
+        SELECT 
+            MAX(etapa_caixa.id_etapa_caixa) AS id_etapa_caixa, 
+            MAX(status_caixa.status) AS status 
+        FROM 
+            etapa_caixa
+            INNER JOIN status_caixa ON status_caixa.id_status_caixa = etapa_caixa.fk_status
+        GROUP BY 
+            etapa_caixa.fk_id_caixa
+    ) AS etapas_max_caixas
+    WHERE 
+        etapas_max_caixas.status = 'Pronta para entrega';
     
     
 CREATE VIEW vw_caixas_atrasadas AS
