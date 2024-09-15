@@ -227,41 +227,31 @@ ENGINE = InnoDB;
 -- CRIAÇÃO DAS VIEWS
 -- -----------------------------------------------------
 USE `db_9solutions` ;
-USE db_9solutions;
 
-DROP VIEW IF EXISTS vw_caixas_em_montagem;
-
-CREATE VIEW vw_caixas_em_montagem AS
-    SELECT COUNT(id_etapa_caixa) AS quantidade_caixas_em_montagem 
-    FROM (
-        SELECT 
-            MAX(etapa_caixa.id_etapa_caixa) AS id_etapa_caixa, 
-            MAX(status_caixa.status) AS status 
-        FROM 
-            etapa_caixa
-            INNER JOIN status_caixa ON status_caixa.id_status_caixa = etapa_caixa.fk_status
-        GROUP BY 
-            etapa_caixa.fk_id_caixa
+CREATE OR REPLACE VIEW vw_caixas_em_montagem AS
+SELECT
+    COUNT(id_etapa_caixa) AS quantidade_caixas_em_montagem
+FROM (
+        SELECT MAX(etapa_caixa.id_etapa_caixa) AS id_etapa_caixa, MAX(etapa_caixa.fk_status) AS fk_status
+        FROM etapa_caixa
+        GROUP BY etapa_caixa.fk_id_caixa
     ) AS etapas_max_caixas
-    WHERE 
-        etapas_max_caixas.status = 'Pronta para montagem';
+    INNER JOIN status_caixa ON status_caixa.id_status_caixa = etapas_max_caixas.fk_status
+WHERE
+    status_caixa.status = 'Pronta para montagem';
 
-DROP VIEW IF EXISTS vw_caixas_para_entregar;
 
-CREATE VIEW vw_caixas_para_entregar AS
-    SELECT COUNT(id_etapa_caixa) AS quantidade_caixas_para_entregar 
-    FROM (
-        SELECT 
-            MAX(etapa_caixa.id_etapa_caixa) AS id_etapa_caixa, 
-            MAX(status_caixa.status) AS status 
-        FROM 
-            etapa_caixa
-            INNER JOIN status_caixa ON status_caixa.id_status_caixa = etapa_caixa.fk_status
-        GROUP BY 
-            etapa_caixa.fk_id_caixa
+CREATE OR REPLACE VIEW vw_caixas_para_entregar AS
+SELECT
+    COUNT(id_etapa_caixa) AS quantidade_caixas_para_entregar
+FROM (
+        SELECT MAX(etapa_caixa.id_etapa_caixa) AS id_etapa_caixa, MAX(etapa_caixa.fk_status) AS fk_status
+        FROM etapa_caixa
+        GROUP BY etapa_caixa.fk_id_caixa
     ) AS etapas_max_caixas
-    WHERE 
-        etapas_max_caixas.status = 'Pronta para entrega';
+    INNER JOIN status_caixa ON status_caixa.id_status_caixa = etapas_max_caixas.fk_status
+WHERE
+    status_caixa.status = 'Pronta para entrega';
     
     
 CREATE VIEW vw_caixas_atrasadas AS
