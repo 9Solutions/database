@@ -323,22 +323,22 @@ ORDER BY
     
 
 CREATE OR REPLACE VIEW `vw_filtros_pedidos` AS
-SELECT pedido.*, max_status_caixa.*
+SELECT pedido.*, max_status_caixa.*, IFNULL(qtd_caixas_with_null, 0) AS qtd_caixas
 FROM
     pedido
-    LEFT JOIN (
+    JOIN (
         SELECT
             MAX(etapa_caixa.id_etapa_caixa) AS id_etapa_caixa,
             MAX(etapa_caixa.fk_status) AS fk_status,
             MAX(fk_id_caixa) AS idCaixa,
-            MAX(fk_pedido) AS fk_pedido
-        FROM
-            etapa_caixa
+            MAX(fk_pedido) AS fk_pedido,
+            COUNT(DISTINCT caixa.id_caixa) AS qtd_caixas_with_null
+        FROM etapa_caixa
             INNER JOIN caixa ON caixa.id_caixa = etapa_caixa.fk_id_caixa
         GROUP BY
             etapa_caixa.fk_id_caixa
     ) AS max_status_caixa ON max_status_caixa.fk_pedido = pedido.idpedido
-    INNER JOIn doador ON pedido.fk_doador = doador.id_doador;
+    INNER JOIN doador ON pedido.fk_doador = doador.id_doador;
 
 
 
@@ -378,9 +378,9 @@ BEGIN
     DECLARE id_status_pedido INT;
     
     SET id_caixa = NEW.fk_id_caixa;
-    SET id_pedido = (SELECT fk_pedido FROM caixa WHERE id_caixa = id_caixa);
+    SET id_pedido = (SELECT fk_pedido FROM caixa WHERE id_caixa = id_caixa LIMIT 1);
     SET id_status_caixa = (SELECT fk_status FROM etapa_caixa WHERE fk_id_caixa = id_caixa ORDER BY id_etapa_caixa DESC LIMIT 1);
-    SET id_status_pedido = (SELECT fk_status_pedido FROM pedido WHERE idpedido = id_pedido);
+    SET id_status_pedido = (SELECT fk_status_pedido FROM pedido WHERE idpedido = id_pedido LIMIT 1);
     
     SET qtd_caixas = (SELECT COUNT(id_caixa) FROM caixa WHERE fk_pedido = id_pedido);
     SET qtd_caixas_enviadas = (SELECT COUNT(id_caixa) FROM etapa_caixa WHERE fk_status = 2 AND fk_id_caixa IN (SELECT id_caixa FROM caixa WHERE fk_pedido = id_pedido));
