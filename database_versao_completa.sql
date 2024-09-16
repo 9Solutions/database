@@ -358,6 +358,43 @@ END//
 
 DELIMITER ;
 
+
+
+/* TRIGGER PARA ATUALIZAR A FK DO STATUS DO PEDIDO DEACORDO COM TODAS AS CAIXAS */
+DROP TRIGGER IF EXISTS atualiza_status_pedido;
+
+DELIMITER //
+
+CREATE TRIGGER atualiza_status_pedido
+AFTER INSERT ON etapa_caixa
+FOR EACH ROW
+BEGIN
+    DECLARE qtd_caixas INT;
+    DECLARE qtd_caixas_enviadas INT;
+    DECLARE qtd_caixas_entregues INT;
+    DECLARE id_caixa INT;
+    DECLARE id_pedido INT;
+    DECLARE id_status_caixa INT;
+    DECLARE id_status_pedido INT;
+    
+    SET id_caixa = NEW.fk_id_caixa;
+    SET id_pedido = (SELECT fk_pedido FROM caixa WHERE id_caixa = id_caixa);
+    SET id_status_caixa = (SELECT fk_status FROM etapa_caixa WHERE fk_id_caixa = id_caixa ORDER BY id_etapa_caixa DESC LIMIT 1);
+    SET id_status_pedido = (SELECT fk_status_pedido FROM pedido WHERE idpedido = id_pedido);
+    
+    SET qtd_caixas = (SELECT COUNT(id_caixa) FROM caixa WHERE fk_pedido = id_pedido);
+    SET qtd_caixas_enviadas = (SELECT COUNT(id_caixa) FROM etapa_caixa WHERE fk_status = 2 AND fk_id_caixa IN (SELECT id_caixa FROM caixa WHERE fk_pedido = id_pedido));
+    SET qtd_caixas_entregues = (SELECT COUNT(id_caixa) FROM etapa_caixa WHERE fk_status = 3 AND fk_id_caixa IN (SELECT id_caixa FROM caixa WHERE fk_pedido = id_pedido));
+
+    IF qtd_caixas = qtd_caixas_entregues THEN
+        UPDATE pedido SET fk_status_pedido = 3 WHERE idpedido = id_pedido;
+    ELSEIF qtd_caixas = qtd_caixas_enviadas THEN
+        UPDATE pedido SET fk_status_pedido = 2 WHERE idpedido = id_pedido;
+    ELSE
+        UPDATE pedido SET fk_status_pedido = 1 WHERE idpedido = id_pedido;
+    END IF;
+END//
+
 -- -----------------------------------------------------
 -- INSERINDO DADOS
 -- -----------------------------------------------------
