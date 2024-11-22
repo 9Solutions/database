@@ -1,4 +1,4 @@
-name: Deploy BackEnd
+name: Deploy Database
 
 'on':
   push:
