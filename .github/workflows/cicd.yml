@@ -73,5 +73,6 @@ jobs:
             chmod 400 $HOME/deploy_key.pem
             scp -i $HOME/deploy_key.pem deploy-database/deploy.sql ubuntu@${{ secrets.IP_PRIVADO_EC2 }}:/home/ubuntu/deploy-database
             scp -i $HOME/deploy_key.pem deploy-database/docker-scripts/* ubuntu@${{ secrets.IP_PRIVADO_EC2 }}:/home/ubuntu/deploy-database/
+            ssh -i $HOME/deploy_key.pem ubuntu@${{ secrets.IP_PRIVADO_EC2 }} "sudo docker network create external_network"
             ssh -i $HOME/deploy_key.pem ubuntu@${{ secrets.IP_PRIVADO_EC2 }} "sudo docker-compose -f /home/ubuntu/deploy-database/docker-compose.yml up -d --build"
           EOF
