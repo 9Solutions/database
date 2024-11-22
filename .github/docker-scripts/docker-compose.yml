@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: mysql-container
+    networks:
+      - internal_network
+    environment:
+      MYSQL_ROOT_PASSWORD: urubu100
+      MYSQL_DATABASE: db_9solutions
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./deploy.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: unless-stopped
+
+
+volumes:
+  mysql_data:
+
+networks:
+  internal_network:
+    external: true

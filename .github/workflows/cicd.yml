@@ -1,0 +1,77 @@
+name: Deploy BackEnd
+
+'on':
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Atualização do código
+        uses: actions/checkout@v2
+
+      - name: Gerar artefato Github
+        uses: actions/upload-artifact@v4
+        with:
+          name: database
+          path: deploy.sql
+
+      - name: Gerar artefato Github com os arquivos docker
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-scripts
+          path: .github/docker-scripts/*
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Recuperar artefato
+        uses: actions/download-artifact@v4
+        with:
+          name: database
+          path: ./
+
+      - name: Recuperar docker-scripts
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-scripts
+          path: ./docker-scripts/
+
+      - name: Enviar o Database p/ a EC2
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ubuntu
+          key: ${{ secrets.ACCESS_WEBSERVER_KEY }}
+          source: ./deploy.sql
+          target: /home/ubuntu/deploy-database/
+
+      - name: Enviar os docker-scripts p/ a EC2
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ubuntu
+          key: ${{ secrets.ACCESS_WEBSERVER_KEY }}
+          source: ./docker-scripts/*
+          target: /home/ubuntu/deploy-database/
+
+      - name: Criar arquivo .pem a partir da variável ACCESS_WEBSERVER_KEY e fazer o chmod 400 nele
+        id: geracao-arquivo-pem
+        run: |
+          echo "${{ secrets.ACCESS_WEBSERVER_KEY }}" >> $HOME/deploy_key.pem
+          chmod 400 $HOME/deploy_key.pem
+    
+      - name: Conectar via SSH à EC2 privada para implantar e reiniciar a API
+        run: |
+          ssh -T -o StrictHostKeyChecking=no -i $HOME/deploy_key.pem ubuntu@${{ secrets.DEPLOY_HOST }} << 'EOF'
+            echo "${{ secrets.ACCESS_WEBSERVER_KEY }}" >> $HOME/deploy_key.pem
+            chmod 400 $HOME/deploy_key.pem
+            scp -i $HOME/deploy_key.pem deploy-database/deploy.sql ubuntu@${{ secrets.IP_PRIVADO_EC2 }}:/home/ubuntu/deploy-database
+            scp -i $HOME/deploy_key.pem deploy-database/docker-scripts/* ubuntu@${{ secrets.IP_PRIVADO_EC2 }}:/home/ubuntu/deploy-database/
+            ssh -i $HOME/deploy_key.pem ubuntu@${{ secrets.IP_PRIVADO_EC2 }} "sudo docker-compose -f /home/ubuntu/deploy-database/docker-compose.yml up -d --build"
+          EOF
