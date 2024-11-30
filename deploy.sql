@@ -687,4 +687,41 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
+DELIMITER ;;
+CREATE TRIGGER atualiza_status_pedido AFTER INSERT ON etapa_caixa FOR EACH ROW BEGIN
+    DECLARE qtd_caixas INT;
+    DECLARE qtd_caixas_enviadas INT;
+    DECLARE qtd_caixas_entregues INT;
+    DECLARE id_caixa INT;
+    DECLARE id_pedido INT;
+    DECLARE id_status_caixa INT;
+    DECLARE id_status_pedido INT;
+    SET id_caixa = NEW.fk_id_caixa;
+    SET id_pedido = (SELECT fk_pedido FROM caixa WHERE id_caixa = id_caixa LIMIT 1);
+    SET id_status_caixa = (SELECT fk_status FROM etapa_caixa WHERE fk_id_caixa = id_caixa ORDER BY id_etapa_caixa DESC LIMIT 1);
+    SET id_status_pedido = (SELECT fk_status_pedido FROM pedido WHERE idpedido = id_pedido LIMIT 1);
+    SET qtd_caixas = (SELECT COUNT(id_caixa) FROM caixa WHERE fk_pedido = id_pedido);
+    SET qtd_caixas_enviadas = (SELECT COUNT(id_caixa) FROM etapa_caixa WHERE fk_status = 2 AND fk_id_caixa IN (SELECT id_caixa FROM caixa WHERE fk_pedido = id_pedido));
+    SET qtd_caixas_entregues = (SELECT COUNT(id_caixa) FROM etapa_caixa WHERE fk_status = 3 AND fk_id_caixa IN (SELECT id_caixa FROM caixa WHERE fk_pedido = id_pedido));
+    IF qtd_caixas = qtd_caixas_entregues THEN
+        UPDATE pedido SET fk_status_pedido = 3 WHERE idpedido = id_pedido;
+    ELSEIF qtd_caixas = qtd_caixas_enviadas THEN
+        UPDATE pedido SET fk_status_pedido = 2 WHERE idpedido = id_pedido;
+    ELSE
+        UPDATE pedido SET fk_status_pedido = 1 WHERE idpedido = id_pedido;
+    END IF;
+END;;
+DELIMITER ;
+
+
+DELIMITER ;;
+ CREATE TRIGGER set_default_qrcode_token BEFORE INSERT ON caixa FOR EACH ROW BEGIN
+
+    IF NEW.qr_code_token IS NULL THEN
+
+        SET NEW.qr_code_token = SHA2(CONCAT(UUID, UNIX_TIMESTAMP()), 256);
+    END IF;
+END;;
+DELIMITER ;
+
 -- Dump completed on 2024-11-22 16:46:55
